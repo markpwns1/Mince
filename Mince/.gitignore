@@ -46,7 +46,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Unnecessary projects
-Mince - Copy/
-Mono.Cecil/
-MinceRuntime/
+# Unnessecary folders
+obj/
+bin/
