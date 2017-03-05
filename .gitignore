@@ -50,3 +50,6 @@ Temporary Items
 Mince - Copy/
 Mono.Cecil/
 MinceRuntime/
+
+# Visual studio stuff
+*.sln
