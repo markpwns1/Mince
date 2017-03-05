@@ -8,12 +8,10 @@ namespace Mince
 {
     public class InterpreterException : Exception
     {
-        public Token token;
-
         public InterpreterException(Token token, string message)
-            : base("At line " + token.line + ", column " + token.column + ": " + message)
-        {
-            this.token = token;
-        }
+            : base("At line " + token.line + ", column " + token.column + ": " + message) { }
+
+        public InterpreterException(int line, int col, string message)
+            : base("At line " + line + ", column " + col + ":" + message) { }
     }
 }

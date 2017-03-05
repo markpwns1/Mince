@@ -108,7 +108,7 @@ namespace Mince.Keywords
                     {
                         if (variable.GetValue().GetType() != typeof(MinceNumber))
                         {
-                            throw new Exception("Can only increment a MinceNumber, not a " + variable.GetValue().GetType().Name);
+                            throw new InterpreterException(interpreter.previousToken, "Can only increment a MinceNumber, not a " + variable.GetValue().GetType().Name);
                         }
 
                         interpreter.Eat();

@@ -251,7 +251,7 @@ namespace Mince
                 case '\"': return new Token(line, column, "STRING", GetString());
             }
 
-            throw new InterpreterException(new Token(line, column), "Unrecognized character " + c.ToString() + " at position " + pointer);
+            throw new InterpreterException(line, column, "Unrecognized character " + c.ToString() + " at position " + pointer);
         }
 
         private MinceString GetString()
