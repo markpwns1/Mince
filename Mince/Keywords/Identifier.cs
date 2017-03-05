@@ -44,7 +44,7 @@ namespace Mince.Keywords
                         }
                         else
                         {
-                            throw new Exception(variable.name + " is not a function! It is a " + variable.GetValue().GetType().Name);
+                            throw new InterpreterException(interpreter.currentToken, variable.name + " is not a function! It is a " + variable.GetValue().GetType().Name);
                         }
 
                         lastWasFunc = true;
@@ -63,7 +63,7 @@ namespace Mince.Keywords
                             {
                                 if (interpreter.parent == null || !object.ReferenceEquals(value, interpreter.parent))
                                 {
-                                    throw new Exception("'" + variable.name + "' is private!");
+                                    throw new InterpreterException(interpreter.previousToken, "'" + variable.name + "' is private!");
                                 }
                             }
 
@@ -78,7 +78,7 @@ namespace Mince.Keywords
                         }
                         else
                         {
-                            throw new Exception("'" + variable.name + "' (" + variable.GetValue().GetType().Name + ") does not contain member '" + name + "'");
+                            throw new InterpreterException(interpreter.previousToken, "'" + variable.name + "' (" + variable.GetValue().GetType().Name + ") does not contain member '" + name + "'");
                         }
 
                         lastWasFunc = false;

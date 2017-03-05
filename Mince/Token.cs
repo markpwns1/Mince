@@ -6,11 +6,14 @@ namespace Mince
     {
         public string type = null;
         public object value = null;
-        public int pos = -1;
 
-        public Token(int pos, string type = null, object value = null)
+        public int line = 0;
+        public int column = 0;
+
+        public Token(int line, int column, string type = null, object value = null)
         {
-            this.pos = pos;
+            this.line = line;
+            this.column = column;
             this.type = type;
             this.value = value;
         }
@@ -19,7 +22,7 @@ namespace Mince
 
         public override string ToString()
         {
-            return "Token(" + this.pos + ", " + this.type + ", " + this.value + ")";
+            return "Token(" + this.line + ", " + this.column + ", " + this.type + ", " + this.value + ")";
         }
     }
 }

@@ -55,6 +55,7 @@
     <Compile Include="Cloner.cs" />
     <Compile Include="Evaluation.cs" />
     <Compile Include="ExposedVariable.cs" />
+    <Compile Include="InterpreterException.cs" />
     <Compile Include="Keywords\Class.cs" />
     <Compile Include="Keywords\FlowControl.cs" />
     <Compile Include="Keywords\For.cs" />

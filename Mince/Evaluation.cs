@@ -162,7 +162,7 @@ namespace Mince
                     {
                         if (interpreter.parent == null || !object.ReferenceEquals(result, interpreter.parent))
                         {
-                            throw new Exception("'" + result.GetMember(memberName).name + "' is private!");
+                            throw new InterpreterException(interpreter.currentToken, "'" + result.GetMember(memberName).name + "' is private!");
                         }
                     }
 
@@ -191,7 +191,7 @@ namespace Mince
                         }
                         else
                         {
-                            throw new Exception("You can only call functions, not " + member.GetType());
+                            throw new InterpreterException(interpreter.currentToken, "You can only call functions, not " + member.GetType());
                         }
                         
                     }
@@ -202,7 +202,7 @@ namespace Mince
                 }
                 else
                 {
-                    throw new Exception("'" + memberName + "' is inaccessible.");
+                    throw new InterpreterException(interpreter.currentToken, "'" + memberName + "' is inaccessible.");
                 }
             }
 
@@ -253,7 +253,7 @@ namespace Mince
                 }
                 else
                 {
-                    throw new Exception("'" + name + "' does not exist in this context");
+                    throw new InterpreterException(interpreter.currentToken, "'" + name + "' does not exist in this context");
                 }
             }
             else if (interpreter.currentToken.type == "NEW")
@@ -299,7 +299,7 @@ namespace Mince
 
                         if (interpreter.variables.Exists(name))
                         {
-                            throw new Exception("A variable called '" + name + "' already exists!");
+                            throw new InterpreterException(interpreter.currentToken, "A variable called '" + name + "' already exists!");
                         }
 
                         paramNames.Add(name);
@@ -322,7 +322,7 @@ namespace Mince
                 interpreter.Eat("L_CURLY_BRACE");
                 interpreter.depth++;
 
-                tokens.Add(new Token(0, "L_CURLY_BRACE"));
+                tokens.Add(new Token(0, 0, "L_CURLY_BRACE"));
 
                 tokens = tokens.Concat(interpreter.SkipBlock()).ToList();
 
@@ -384,7 +384,7 @@ namespace Mince
                 return new MinceNull();
             }
 
-            throw new Exception(
+            throw new InterpreterException(interpreter.currentToken, 
                 "Unexpected token " + interpreter.currentToken.ToString() + " found when looking for a factor at token #" + interpreter.pointer);
         }
     }

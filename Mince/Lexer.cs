@@ -12,6 +12,21 @@ namespace Mince
 
         public int pointer = 0;
 
+        public int line = 1;
+        public int column = 0;
+
+        public void Eat()
+        {
+            pointer++;
+            column++;
+        }
+
+        public void NewLine()
+        {
+            column = 0;
+            line++;
+        }
+
         public List<Token> ScanFile(string file)
         {
             filename = file;
@@ -22,7 +37,7 @@ namespace Mince
             while (true)
             {
                 Token tk = GetNextToken();
-
+                
                 list.Add(tk);
 
                 if (tk.type == "EOF")
@@ -60,29 +75,34 @@ namespace Mince
         {
             if (pointer >= inputText.Length)
             {
-                return new Token(pointer, "EOF");
+                return new Token(line, column, "EOF");
             }
 
-            if (char.IsWhiteSpace(GetCurrentChar()))
+            if (CurrentChar == '\n')
+            {
+                NewLine();
+            }
+
+            if (char.IsWhiteSpace(CurrentChar))
             {
                 SkipWhitespace();
             }
 
             if (pointer >= inputText.Length)
             {
-                return new Token(pointer, "EOF");
+                return new Token(line, column, "EOF");
             }
 
-            char c = GetCurrentChar();
+            char c = CurrentChar;
 
             if (char.IsDigit(c))
             {
-                return new Token(pointer, "NUMBER", GetNumber());
+                return new Token(line, column, "NUMBER", GetNumber());
             }
 
             if (char.IsLetter(c))
             {
-                Token tk = new Token(pointer, "IDENTIFIER", GetIdentifier());
+                Token tk = new Token(line, column, "IDENTIFIER", GetIdentifier());
 
                 switch (tk.value.ToString())
                 {
@@ -135,19 +155,19 @@ namespace Mince
 
             if (c == '-')
             {
-                pointer++;
+                Eat();
 
-                if (char.IsDigit(GetCurrentChar()))
+                if (char.IsDigit(CurrentChar))
                 {
-                    return new Token(pointer, "NUMBER", GetNegativeNumber());
+                    return new Token(line, column, "NUMBER", GetNegativeNumber());
                 }
 
-                return new Token(pointer, "MINUS");
+                return new Token(line, column, "MINUS");
             }
 
             if (c == '=')
             {
-                Token tk = new Token(pointer, "EQUALS", GetEquals());
+                Token tk = new Token(line, column, "EQUALS", GetEquals());
                 if (tk.value.ToString() == "==")
                 {
                     tk.type = "IS_EQUAL";
@@ -157,7 +177,7 @@ namespace Mince
 
             if (c == '>' || c == '<')
             {
-                Token tk = new Token(pointer, null, GetComparator(c.ToString()));
+                Token tk = new Token(line, column, null, GetComparator(c.ToString()));
                 switch (tk.value.ToString())
                 {
                     case ">": tk.type = "GREATER_THAN"; break;
@@ -170,7 +190,7 @@ namespace Mince
 
             if (c == '!')
             {
-                Token tk = new Token(pointer, "NOT", GetComparator(c.ToString()));
+                Token tk = new Token(line, column, "NOT", GetComparator(c.ToString()));
                 if (tk.value.ToString() == "!=")
                 {
                     tk.type = "NOT_EQUAL";
@@ -180,27 +200,27 @@ namespace Mince
 
             if (c == '\'')
             {
-                Token tk = new Token(pointer, "CHAR");
-                pointer++;
-                tk.value = new MinceChar(GetCurrentChar());
+                Token tk = new Token(line, column, "CHAR");
+                Eat();
+                tk.value = new MinceChar(CurrentChar);
                 pointer += 2;
                 return tk;
             }
 
             if (c == '/')
             {
-                Token tk = new Token(pointer, "DIVIDE");
-                pointer++;
+                Token tk = new Token(line, column, "DIVIDE");
+                Eat();
 
-                if (GetCurrentChar() == '/')
+                if (CurrentChar == '/')
                 {
-                    pointer++;
+                    Eat();
                     SkipSingleLineComment();
                     return GetNextToken();
                 }
-                else if (GetCurrentChar() == '*')
+                else if (CurrentChar == '*')
                 {
-                    pointer++;
+                    Eat();
                     SkipMultilineComment();
                     return GetNextToken();
                 }
@@ -210,45 +230,55 @@ namespace Mince
 
             switch (c)
             {
-                case '+': pointer++; return new Token(pointer, "PLUS");
-                case '*': pointer++; return new Token(pointer, "MULTIPLY");
-                case '%': pointer++; return new Token(pointer, "MODULUS");
-                case '^': pointer++; return new Token(pointer, "EXPONENT");
-                case '(': pointer++; return new Token(pointer, "L_BRACKET");
-                case ')': pointer++; return new Token(pointer, "R_BRACKET");
-                case '.': pointer++; return new Token(pointer, "DOT");
-                case ',': pointer++; return new Token(pointer, "COMMA");
-                case '{': pointer++; return new Token(pointer, "L_CURLY_BRACE");
-                case '}': pointer++; return new Token(pointer, "R_CURLY_BRACE");
-                case ':': pointer++; return new Token(pointer, "COLON");
-                case '#': pointer++; return new Token(pointer, "HASH");
-                case '@': pointer++; return new Token(pointer, "AT_SYMBOL");
-                case ';': pointer++; return new Token(pointer, "SEMICOLON");
-                case '&': pointer++; return new Token(pointer, "AND");
-                case '|': pointer++; return new Token(pointer, "OR");
-                case '[': pointer++; return new Token(pointer, "L_SQUARE_BRACKET");
-                case ']': pointer++; return new Token(pointer, "R_SQUARE_BRACKET");
-                case '\"': return new Token(pointer, "STRING", GetString());
+                case '+': Eat(); return new Token(line, column, "PLUS");
+                case '*': Eat(); return new Token(line, column, "MULTIPLY");
+                case '%': Eat(); return new Token(line, column, "MODULUS");
+                case '^': Eat(); return new Token(line, column, "EXPONENT");
+                case '(': Eat(); return new Token(line, column, "L_BRACKET");
+                case ')': Eat(); return new Token(line, column, "R_BRACKET");
+                case '.': Eat(); return new Token(line, column, "DOT");
+                case ',': Eat(); return new Token(line, column, "COMMA");
+                case '{': Eat(); return new Token(line, column, "L_CURLY_BRACE");
+                case '}': Eat(); return new Token(line, column, "R_CURLY_BRACE");
+                case ':': Eat(); return new Token(line, column, "COLON");
+                case '#': Eat(); return new Token(line, column, "HASH");
+                case '@': Eat(); return new Token(line, column, "AT_SYMBOL");
+                case ';': Eat(); return new Token(line, column, "SEMICOLON");
+                case '&': Eat(); return new Token(line, column, "AND");
+                case '|': Eat(); return new Token(line, column, "OR");
+                case '[': Eat(); return new Token(line, column, "L_SQUARE_BRACKET");
+                case ']': Eat(); return new Token(line, column, "R_SQUARE_BRACKET");
+                case '\"': return new Token(line, column, "STRING", GetString());
             }
 
-            throw new Exception("Unrecognized character " + c.ToString() + " at position " + pointer);
+            throw new InterpreterException(new Token(line, column), "Unrecognized character " + c.ToString() + " at position " + pointer);
         }
 
         private MinceString GetString()
         {
             string result = "";
-            pointer++;
-            while (GetCurrentChar() != '\"')
+            Eat();
+
+            while (CurrentChar != '\"')
             {
-                if (GetCurrentChar() == '\\')
+                if (CurrentChar == '\\')
                 {
-                    pointer++;
+                    Eat();
+
+                    if (CurrentChar == 'n')
+                    {
+                        result += Environment.NewLine;
+                        Eat();
+                        continue;
+                    }
                 }
 
-                result += GetCurrentChar();
-                pointer++;
+                result += CurrentChar;
+
+                Eat();
             }
-            pointer++;
+
+            Eat();
             return new MinceString(result);
         }
 
@@ -258,16 +288,16 @@ namespace Mince
 
             bool usedDecimal = false;
 
-            while (pointer < inputText.Length && (char.IsDigit(GetCurrentChar()) || (GetCurrentChar() == '.' && !usedDecimal && char.IsDigit(GetNextChar()))))
+            while (pointer < inputText.Length && (char.IsDigit(CurrentChar) || (CurrentChar == '.' && !usedDecimal && char.IsDigit(NextChar))))
             {
-                result += GetCurrentChar();
+                result += CurrentChar;
 
-                if (GetCurrentChar() == '.')
+                if (CurrentChar == '.')
                 {
                     usedDecimal = true;
                 }
 
-                pointer++;
+                Eat();
             }
 
             return new MinceNumber(float.Parse(result));
@@ -279,16 +309,16 @@ namespace Mince
 
             bool usedDecimal = false;
 
-            while (pointer < inputText.Length && (char.IsDigit(GetCurrentChar()) || (GetCurrentChar() == '.' && !usedDecimal && char.IsDigit(GetNextChar()))))
+            while (pointer < inputText.Length && (char.IsDigit(CurrentChar) || (CurrentChar == '.' && !usedDecimal && char.IsDigit(NextChar))))
             {
-                result += GetCurrentChar();
+                result += CurrentChar;
 
-                if (GetCurrentChar() == '.')
+                if (CurrentChar == '.')
                 {
                     usedDecimal = true;
                 }
 
-                pointer++;
+                Eat();
             }
 
             return new MinceNumber(float.Parse(result));
@@ -298,10 +328,10 @@ namespace Mince
         {
             string result = "";
 
-            while (pointer < inputText.Length && (char.IsLetterOrDigit(GetCurrentChar()) || GetCurrentChar() == '_'))
+            while (pointer < inputText.Length && (char.IsLetterOrDigit(CurrentChar) || CurrentChar == '_'))
             {
-                result += GetCurrentChar();
-                pointer++;
+                result += CurrentChar;
+                Eat();
             }
 
             return result;
@@ -309,50 +339,55 @@ namespace Mince
 
         private void SkipWhitespace()
         {
-            while (pointer < inputText.Length && char.IsWhiteSpace(GetCurrentChar()))
+            while (pointer < inputText.Length && char.IsWhiteSpace(CurrentChar))
             {
-                pointer++;
+                if (CurrentChar == '\n')
+                {
+                    NewLine();
+                }
+
+                Eat();
             }
         }
 
-        private char GetCurrentChar()
+        private char CurrentChar
         {
-            return inputText[pointer];
+            get { return inputText[pointer]; }
         }
 
-        private char GetNextChar()
+        private char NextChar
         {
-            return inputText[pointer + 1];
+            get { return inputText[pointer + 1]; }
         }
 
         private string GetEquals()
         {
             string result = "=";
-            pointer++;
-            if (GetCurrentChar() == '=')
+            Eat();
+            if (CurrentChar == '=')
             {
                 result += '=';
-                pointer++;
+                Eat();
             }
             return result;
         }
 
         private string GetComparator(string result)
         {
-            pointer++;
-            if (GetCurrentChar() == '=')
+            Eat();
+            if (CurrentChar == '=')
             {
                 result += '=';
-                pointer++;
+                Eat();
             }
             return result;
         }
 
         private void SkipSingleLineComment()
         {
-            while (pointer < inputText.Length && GetCurrentChar() != '\n')
+            while (pointer < inputText.Length && CurrentChar != '\n')
             {
-                pointer++;
+                Eat();
             }
         }
 
@@ -365,13 +400,13 @@ namespace Mince
                     break;
                 }
 
-                if (GetCurrentChar() == '*' && GetNextChar() == '/')
+                if (CurrentChar == '*' && NextChar == '/')
                 {
                     pointer += 2;
                     break;
                 }
 
-                pointer++;
+                Eat();
             }
         }
 

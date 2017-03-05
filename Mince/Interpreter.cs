@@ -75,6 +75,11 @@ namespace Mince
             get { return tokens[pointer]; }
         }
 
+        public Token previousToken
+        {
+            get { return tokens[pointer - 1]; }
+        }
+
         public int depth = 0;
 
         public List<LoopPosition> loopPositions = new List<LoopPosition>();

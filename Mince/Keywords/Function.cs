@@ -34,7 +34,7 @@ namespace Mince.Keywords
 
                     if (interpreter.variables.Exists(name))
                     {
-                        throw new Exception("A variable called '" + name + "' already exists!");
+                        throw new InterpreterException(interpreter.previousToken, "A variable called '" + name + "' already exists!");
                     }
 
                     paramNames.Add(name);
@@ -49,7 +49,7 @@ namespace Mince.Keywords
                     }
                     else
                     {
-                        throw new Exception("Expected ',' or '{' after parameter name");
+                        throw new InterpreterException(interpreter.currentToken, "Expected ',' or '{' after parameter name");
                     }
                 }
             }
@@ -57,7 +57,7 @@ namespace Mince.Keywords
             interpreter.Eat("L_CURLY_BRACE");
             interpreter.depth++;
 
-            tokens.Add(new Token(0, "L_CURLY_BRACE"));
+            tokens.Add(new Token(0, 0, "L_CURLY_BRACE"));
 
             tokens = tokens.Concat(interpreter.SkipBlock()).ToList();
 

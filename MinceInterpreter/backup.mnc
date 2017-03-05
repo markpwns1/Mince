@@ -1,11 +1,4 @@
-myFile = new File("new file.txt");
-bytes = [ 45, 34, 144, 10, 5 ];
-myFile.writeBytes(bytes);
-myFile.dispose();
-
-file.run("new file.txt");
-
-/*console.title = "Interactive Mince Console";
+console.title = "Interactive Mince Console";
 
 console.print("Interactive Mince Console");
 console.print("Type console.exit(); to exit");
@@ -22,4 +15,4 @@ while true {
 	}
 
 	console.print(output);
-}*/
+}
