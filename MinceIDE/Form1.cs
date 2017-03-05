@@ -298,5 +298,15 @@ namespace MinceIDE
 
             MessageBox.Show("Could not run the file! Go to compiler/Build/program.exe to run it manually.");
         }
+
+        private void Documentation_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/markpwns1/Mince/wiki");
+        }
+
+        private void Github_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/markpwns1/Mince");
+        }
     }
 }

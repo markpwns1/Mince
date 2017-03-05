@@ -1,8 +1,7 @@
 ﻿Copyright (c) 2017 Mark Kaldas
 
-This programming language, with the exception of the file 'ObjectExtensions.cs' is 
-protected under the Attribution-ShareAlike 4.0 International license. You may read the terms
-at: https://creativecommons.org/licenses/by-sa/4.0/
+This programming language is protected under the Attribution-ShareAlike 4.0
+International license. You may read the terms at: https://creativecommons.org/licenses/by-sa/4.0/
 
 You are free to:
 
