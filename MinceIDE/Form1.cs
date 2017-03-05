@@ -265,9 +265,11 @@ namespace MinceIDE
 
             ProcessStartInfo p = new ProcessStartInfo(Application.StartupPath + "/Compiler/MinceCompiler.exe");
             p.WindowStyle = ProcessWindowStyle.Hidden;
-            //p.CreateNoWindow = true;
+            p.UseShellExecute = true;
             p.WorkingDirectory = Application.StartupPath + "/Compiler";
             p.Arguments = "\"" + "program.mnc" + "\"";
+            p.Verb = "runas";
+
             Process.Start(p);
 
             Thread t = new Thread(new ThreadStart(WaitForFile));
