@@ -12,6 +12,6 @@ namespace Mince
             : base("At line " + token.line + ", column " + token.column + ": " + message) { }
 
         public InterpreterException(int line, int col, string message)
-            : base("At line " + line + ", column " + col + ":" + message) { }
+            : base("At line " + line + ", column " + col + ": " + message) { }
     }
 }
