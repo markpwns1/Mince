@@ -314,7 +314,7 @@ namespace Mince
                         }
                         else
                         {
-                            throw new Exception("Expected ',' or '{' after parameter name");
+                            throw new InterpreterException(interpreter.currentToken, "Expected ',' or '{' after parameter name");
                         }
                     }
                 }

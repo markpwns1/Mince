@@ -109,7 +109,7 @@ namespace Mince
                     return currentToken.value;
                 }
 
-                throw new Exception("Expected " + type + " but got " + currentToken + " at token #" + pointer);
+                throw new InterpreterException(currentToken, "Expected " + type + " but got " + currentToken + " at token #" + pointer);
             }
         }
 
@@ -156,7 +156,7 @@ namespace Mince
                 return new MinceNull();
             }
 
-            throw new Exception("Unrecognized token: " + currentToken.ToString());
+            throw new InterpreterException(currentToken, "Unrecognized token: " + currentToken.ToString());
         }
 
         public MinceObject EvaluateBlock(int? startDepth = null)

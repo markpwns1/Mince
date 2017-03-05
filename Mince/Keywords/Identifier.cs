@@ -95,7 +95,7 @@ namespace Mince.Keywords
                     {
                         if (variable.isReadOnly)
                         {
-                            throw new Exception("'" + variable.name + "' is readonly!");
+                            throw new InterpreterException(interpreter.previousToken, "'" + variable.name + "' is readonly!");
                         }
 
                         interpreter.Eat();

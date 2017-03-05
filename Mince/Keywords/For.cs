@@ -16,6 +16,8 @@ namespace Mince.Keywords
 
             interpreter.Eat();
 
+            var varToken = interpreter.currentToken;
+
             string varName = interpreter.Eat("IDENTIFIER").ToString();
             interpreter.Eat("EQUALS");
             MinceNumber varValue = (MinceNumber)interpreter.evaluation.Evaluate();
@@ -30,7 +32,7 @@ namespace Mince.Keywords
 
                 if (interpreter.variables.Exists(varName))
                 {
-                    throw new Exception("Cannot use variable '" + varName + "' in a for loop because it already exists!");
+                    throw new InterpreterException(varToken, "Cannot use variable '" + varName + "' in a for loop because it already exists!");
                 }
 
                 interpreter.variables.variables.Add(indexVar);
