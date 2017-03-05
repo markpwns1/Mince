@@ -14,9 +14,12 @@ namespace Mince.Keywords
         public override MinceObject Evaluate(Interpreter interpreter)
         {
             interpreter.Eat();
-            string name = interpreter.Eat("IDENTIFIER").ToString();
-            interpreter.variables.variables.Remove(interpreter.variables.variables.Find(x => x.name == name));
+
+            Variable v = Identifier.GetIdentifier(interpreter);
+
+            v = null;
             interpreter.Eat("SEMICOLON");
+
             return new MinceNull();
         }
     }

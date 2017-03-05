@@ -11,15 +11,12 @@ namespace MinceInterpreter
 {
     class Program
     {
-        public static Lexer lexer;
         public static Interpreter interpreter;
         public static Evaluation eval;
 
         public static void Main(string[] args)
         {
             List<Token> tokens;
-
-            lexer = new Lexer();
             eval = new Evaluation();
             interpreter = new Interpreter(eval);
 
@@ -41,12 +38,12 @@ namespace MinceInterpreter
                     }
                 }
 
-                tokens = lexer.ScanString(text);
+                tokens = Lexer.ScanString(text);
 
             }
             else if (args.Length > 0)
             {
-                tokens = lexer.ScanFile(args[0]);
+                tokens = Lexer.ScanFile(args[0]);
             }
             else
             {
@@ -60,7 +57,7 @@ namespace MinceInterpreter
                     }
                 }
 
-                tokens = lexer.ScanString(text);
+                tokens = Lexer.ScanString(text);
             }
 
             interpreter.variables.variables.Add(new Variable("args", new MinceArray(args.Select(x => new MinceString(x)).ToArray())));

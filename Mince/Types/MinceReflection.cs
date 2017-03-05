@@ -56,14 +56,13 @@ namespace Mince.Types
         [Exposed]
         public MinceObject evaluate(MinceString str)
         {
-            Lexer lexer = new Lexer();
             Evaluation eval = new Evaluation();
 
             Variables v = interpreter.variables;
 
             Interpreter intr = new Interpreter(eval);
 
-            intr.tokens = lexer.ScanString(str.value.ToString());
+            intr.tokens = Lexer.ScanString(str.ToString());
 
             eval.Init(intr);
 
@@ -79,54 +78,45 @@ namespace Mince.Types
         [Exposed]
         public MinceObject execute(MinceString str)
         {
-            Lexer lexer = new Lexer();
+            Evaluation eval = new Evaluation();
 
-            int before = interpreter.pointer;
-            int beforeDepth = interpreter.depth;
-            
-            interpreter.tokens.RemoveAt(interpreter.tokens.Count - 1); // remove EOF;
+            Variables v = interpreter.variables;
 
-            int to = interpreter.tokens.Count;
+            Interpreter intr = new Interpreter(eval);
 
-            interpreter.tokens.AddRange(lexer.ScanString(str.value.ToString()));
+            intr.tokens.Add(new Token(1, 0, "L_CURLY_BRACE"));
+            intr.tokens.AddRange(Lexer.ScanString(str.ToString()));
+            intr.tokens.Add(new Token(1, 0, "R_CURLY_BRACE"));
 
-            interpreter.GoTo(to);
-            interpreter.depth = 0;
+            eval.Init(intr);
 
-            MinceObject returnValue = new MinceNull();
+            intr.variables = v;
 
-            while (interpreter.currentToken.type != "EOF" && returnValue.GetType() == typeof(MinceNull))
-            {
-                returnValue = interpreter.EvaluateOnce();
-            }
+            MinceObject result = intr.EvaluateBlock();
 
-            interpreter.GoTo(before);
-            interpreter.depth = beforeDepth;
+            intr.Dispose();
 
-            return returnValue;
+            return result;
         }
 
         [Exposed]
         public MinceObject executeOnce(MinceString str)
         {
-            Lexer lexer = new Lexer();
+            Evaluation eval = new Evaluation();
 
-            int before = interpreter.pointer;
-            int beforeDepth = interpreter.depth;
+            Variables v = interpreter.variables;
 
-            interpreter.tokens.RemoveAt(interpreter.tokens.Count - 1); // remove EOF;
+            Interpreter intr = new Interpreter(eval);
 
-            int to = interpreter.tokens.Count;
+            intr.tokens.AddRange(Lexer.ScanString(str.ToString()));
 
-            interpreter.tokens.AddRange(lexer.ScanString(str.value.ToString()));
+            eval.Init(intr);
 
-            interpreter.GoTo(to);
-            interpreter.depth = 0;
+            intr.variables = v;
 
-            var result = interpreter.EvaluateOnce();
+            MinceObject result = intr.EvaluateOnce();
 
-            interpreter.GoTo(before);
-            interpreter.depth = beforeDepth;
+            intr.Dispose();
 
             return result;
         }
@@ -134,31 +124,25 @@ namespace Mince.Types
         [Exposed]
         public MinceObject executeFile(MinceString path)
         {
-            Lexer lexer = new Lexer();
+            Evaluation eval = new Evaluation();
 
-            int before = interpreter.pointer;
-            int beforeDepth = interpreter.depth;
+            Variables v = interpreter.variables;
 
-            interpreter.tokens.RemoveAt(interpreter.tokens.Count - 1); // remove EOF;
+            Interpreter intr = new Interpreter(eval);
 
-            int to = interpreter.tokens.Count;
+            intr.tokens.Add(new Token(1, 0, "L_CURLY_BRACE"));
+            intr.tokens.AddRange(Lexer.ScanFile(path.ToString()));
+            intr.tokens.Add(new Token(1, 0, "R_CURLY_BRACE"));
 
-            interpreter.tokens.AddRange(lexer.ScanFile(path.value.ToString()));
+            eval.Init(intr);
 
-            interpreter.GoTo(to);
-            interpreter.depth = 0;
+            intr.variables = v;
 
-            MinceObject returnValue = new MinceNull();
+            MinceObject result = intr.EvaluateBlock();
 
-            while (interpreter.currentToken.type != "EOF" && returnValue.GetType() == typeof(MinceNull))
-            {
-                returnValue = interpreter.EvaluateOnce();
-            }
+            intr.Dispose();
 
-            interpreter.GoTo(before);
-            interpreter.depth = beforeDepth;
-
-            return returnValue;
+            return result;
         }
     }
 }

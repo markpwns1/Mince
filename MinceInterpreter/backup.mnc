@@ -7,12 +7,7 @@ while true {
 	console.write("> ");
 	input = console.readLine();
 
-	output = null;
-	try {
-		output = mince.execute(input);
-	} catch {
-		console.print("Error!");
-	}
+	output = mince.execute(input);
 
 	console.print(output);
 }

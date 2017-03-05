@@ -167,6 +167,11 @@ namespace Mince
 
             while (depth > startDepth)
             {
+                if (currentToken.type == "EOF")
+                {
+                    break;
+                }
+
                 var r = EvaluateOnce();
 
                 if (result.GetType() == typeof(MinceNull) && r.GetType() != typeof(MinceNull))

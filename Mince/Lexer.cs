@@ -5,29 +5,29 @@ using Mince.Types;
 
 namespace Mince
 {
-    public class Lexer
+    public static class Lexer
     {
-        public string filename;
-        public string inputText;
+        public static string filename;
+        public static string inputText;
 
-        public int pointer = 0;
+        public static int pointer = 0;
 
-        public int line = 1;
-        public int column = 0;
+        public static int line = 1;
+        public static int column = 0;
 
-        public void Eat()
+        private static void Eat()
         {
             pointer++;
             column++;
         }
 
-        public void NewLine()
+        private static void NewLine()
         {
             column = 0;
             line++;
         }
 
-        public List<Token> ScanFile(string file)
+        public static List<Token> ScanFile(string file)
         {
             filename = file;
             inputText = File.ReadAllText(file);
@@ -46,10 +46,14 @@ namespace Mince
                 }
             }
 
+            pointer = 0;
+            line = 1;
+            column = 0;
+
             return list;
         }
 
-        public List<Token> ScanString(string input)
+        public static List<Token> ScanString(string input)
         {
             filename = "untitled";
             inputText = input;
@@ -68,10 +72,14 @@ namespace Mince
                 }
             }
 
+            pointer = 0;
+            line = 1;
+            column = 0;
+
             return list;
         }
 
-        private Token GetNextToken()
+        private static Token GetNextToken()
         {
             if (pointer >= inputText.Length)
             {
@@ -254,7 +262,7 @@ namespace Mince
             throw new InterpreterException(line, column, "Unrecognized character " + c.ToString() + " at position " + pointer);
         }
 
-        private MinceString GetString()
+        private static MinceString GetString()
         {
             string result = "";
             Eat();
@@ -282,7 +290,7 @@ namespace Mince
             return new MinceString(result);
         }
 
-        private MinceNumber GetNegativeNumber()
+        private static MinceNumber GetNegativeNumber()
         {
             string result = "-";
 
@@ -303,7 +311,7 @@ namespace Mince
             return new MinceNumber(float.Parse(result));
         }
 
-        private MinceNumber GetNumber()
+        private static MinceNumber GetNumber()
         {
             string result = "";
 
@@ -324,7 +332,7 @@ namespace Mince
             return new MinceNumber(float.Parse(result));
         }
 
-        private string GetIdentifier()
+        private static string GetIdentifier()
         {
             string result = "";
 
@@ -337,7 +345,7 @@ namespace Mince
             return result;
         }
 
-        private void SkipWhitespace()
+        private static void SkipWhitespace()
         {
             while (pointer < inputText.Length && char.IsWhiteSpace(CurrentChar))
             {
@@ -350,17 +358,17 @@ namespace Mince
             }
         }
 
-        private char CurrentChar
+        private static char CurrentChar
         {
             get { return inputText[pointer]; }
         }
 
-        private char NextChar
+        private static char NextChar
         {
             get { return inputText[pointer + 1]; }
         }
 
-        private string GetEquals()
+        private static string GetEquals()
         {
             string result = "=";
             Eat();
@@ -372,7 +380,7 @@ namespace Mince
             return result;
         }
 
-        private string GetComparator(string result)
+        private static string GetComparator(string result)
         {
             Eat();
             if (CurrentChar == '=')
@@ -383,7 +391,7 @@ namespace Mince
             return result;
         }
 
-        private void SkipSingleLineComment()
+        private static void SkipSingleLineComment()
         {
             while (pointer < inputText.Length && CurrentChar != '\n')
             {
@@ -391,7 +399,7 @@ namespace Mince
             }
         }
 
-        private void SkipMultilineComment()
+        private static void SkipMultilineComment()
         {
             while (true)
             {
@@ -410,12 +418,7 @@ namespace Mince
             }
         }
 
-        private void GoTo(int position)
-        {
-            pointer = position;
-        }
-
-        private int GetPosition()
+        private static int GetPosition()
         {
             return pointer;
         }
