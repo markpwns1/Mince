@@ -10,6 +10,8 @@ namespace Mince
     {
         private List<Variable> tree = new List<Variable>();
 
+        public bool lastWasFunc = false;
+
         public int length
         {
             get { return tree.Count; }
@@ -45,5 +47,6 @@ namespace Mince
         {
             tree.Add(v);
         }
+
     }
 }

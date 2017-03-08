@@ -20,93 +20,9 @@ namespace Mince.Keywords
             {
                 Variable variable = interpreter.variables.Get(identifier);
                 MinceObject value = variable.GetValue();
+                bool lastWasFunc = variable.GetValue().GetType() == typeof(MinceFunction) || variable.GetValue().GetType() == typeof(MinceUserFunction);
 
                 tree.Add(variable);
-
-                while (true)
-                {
-                    if (interpreter.currentToken.type == "L_BRACKET")
-                    {
-                        if (variable.GetValue().GetType() == typeof(MinceUserFunction))
-                        {
-                            var func = variable.GetValue() as MinceUserFunction;
-
-                            interpreter.Eat();
-                            MinceObject[] args = interpreter.GetParameters();
-                            interpreter.Eat("R_BRACKET");
-
-                            value = func.call(args);
-                        }
-                        else if (variable.GetValue().GetType() == typeof(MinceFunction))
-                        {
-                            interpreter.Eat();
-                            MinceObject[] p = interpreter.GetParameters();
-                            interpreter.Eat("R_BRACKET");
-
-                            value = (variable.GetValue() as MinceFunction).Call(p);
-                        }
-                        else
-                        {
-                            throw new InterpreterException(interpreter.currentToken, variable.name + " is not a function! It is a " + variable.GetValue().GetType().Name);
-                        }
-                    }
-
-                    if (interpreter.currentToken.type == "DOT")
-                    {
-                        interpreter.Eat();
-                        string name = interpreter.Eat("IDENTIFIER").ToString();
-
-                        if (value.MemberExists(name))
-                        {
-                            variable = value.GetMember(name);
-                            tree.Add(variable);
-
-                            if (variable.isPrivate)
-                            {
-                                if (interpreter.parent == null || !object.ReferenceEquals(value, interpreter.parent))
-                                {
-                                    throw new InterpreterException(interpreter.previousToken, "'" + variable.name + "' is private!");
-                                }
-                            }
-
-                            value = variable.GetValue();
-                        }
-                        else if (variable.GetValue().GetType() == typeof(MinceDynamic))
-                        {
-                            Variable v = new Variable(name, new MinceDynamic(), false, -1);
-                            value.members.Add(v);
-
-                            variable = v;
-                            tree.Add(variable);
-                        }
-                        else
-                        {
-                            throw new InterpreterException(interpreter.previousToken, "'" + variable.name + "' (" + variable.GetValue().GetType().Name + ") does not contain member '" + name + "'");
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                return tree;
-            }
-            else
-            {
-                throw new InterpreterException(interpreter.previousToken, "Variable '" + identifier + "' does not exist!");
-            }
-        }
-
-        public override MinceObject Evaluate(Interpreter interpreter)
-        {
-            string identifier = interpreter.Eat().ToString();
-
-            if (interpreter.variables.Exists(identifier))
-            {
-                Variable variable = interpreter.variables.Get(identifier);
-                MinceObject value = variable.GetValue();
-                bool lastWasFunc = variable.GetValue().GetType() == typeof(MinceFunction) || variable.GetValue().GetType() == typeof(MinceUserFunction);
 
                 while (true)
                 {
@@ -146,6 +62,7 @@ namespace Mince.Keywords
                         if (value.MemberExists(name))
                         {
                             variable = value.GetMember(name);
+                            tree.Add(variable);
 
                             if (variable.isPrivate)
                             {
@@ -163,6 +80,7 @@ namespace Mince.Keywords
                             value.members.Add(v);
 
                             variable = v;
+                            tree.Add(variable);
                         }
                         else
                         {
@@ -177,32 +95,64 @@ namespace Mince.Keywords
                     }
                 }
 
-                if (!lastWasFunc)
+                tree.lastWasFunc = false;
+
+                return tree;
+            }
+            else
+            {
+                throw new InterpreterException(interpreter.previousToken, "Variable '" + identifier + "' does not exist!");
+            }
+        }
+
+        public override MinceObject Evaluate(Interpreter interpreter)
+        {
+            string identifier = interpreter.Eat().ToString();
+
+            if (interpreter.variables.Exists(identifier))
+            {
+                interpreter.pointer--;
+                VariableTree tree = Identifier.GetTree(interpreter);
+
+                if (!tree.lastWasFunc)
                 {
                     if (interpreter.currentToken.type == "EQUALS")
                     {
-                        if (variable.isReadOnly)
+                        if (tree.lastVariable.isReadOnly)
                         {
-                            throw new InterpreterException(interpreter.previousToken, "'" + variable.name + "' is readonly!");
+                            throw new InterpreterException(interpreter.previousToken, "'" + tree.lastVariable.name + "' is readonly!");
                         }
 
                         interpreter.Eat();
 
                         MinceObject result = interpreter.evaluation.Evaluate();
 
-                        variable.SetValue(result);
+                        tree.lastVariable.SetValue(result);
                     }
                     else if (interpreter.currentToken.type == "PLUS" && interpreter.tokens[interpreter.pointer + 1].type == "PLUS")
                     {
-                        if (variable.GetValue().GetType() != typeof(MinceNumber))
+                        if (tree.lastVariable.GetValue().GetType() != typeof(MinceNumber))
                         {
-                            throw new InterpreterException(interpreter.previousToken, "Can only increment a MinceNumber, not a " + variable.GetValue().GetType().Name);
+                            throw new InterpreterException(interpreter.previousToken, "Can only increment a MinceNumber, not a " + tree.lastVariable.GetValue().GetType().Name);
                         }
 
                         interpreter.Eat();
                         interpreter.Eat();
 
-                        ((MinceNumber)variable.GetValue()).inc();
+                        ((MinceNumber)tree.lastVariable.GetValue()).inc();
+                    }
+                    else if (interpreter.currentToken.type == "MINUS" && interpreter.tokens[interpreter.pointer + 1].type == "MINUS")
+                    {
+                        if (tree.lastVariable.GetValue().GetType() != typeof(MinceNumber))
+                        {
+                            throw new InterpreterException(interpreter.previousToken, "Can only increment a MinceNumber, not a " + tree.lastVariable.GetValue().GetType().Name);
+                        }
+
+                        interpreter.Eat();
+                        interpreter.Eat();
+
+                        MinceNumber num = (MinceNumber)tree.lastVariable.GetValue();
+                        tree.lastVariable.SetValue(num.Minus(new MinceNumber(1)));
                     }
                 }
 
