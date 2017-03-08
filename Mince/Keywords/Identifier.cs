@@ -10,14 +10,18 @@ namespace Mince.Keywords
     [InterpreterKeyword("IDENTIFIER")]
     public class Identifier : Keyword
     {
-        public static Variable GetIdentifier(Interpreter interpreter)
+        public static VariableTree GetTree(Interpreter interpreter)
         {
+            VariableTree tree = new VariableTree();
+
             string identifier = interpreter.Eat().ToString();
 
             if (interpreter.variables.Exists(identifier))
             {
                 Variable variable = interpreter.variables.Get(identifier);
                 MinceObject value = variable.GetValue();
+
+                tree.Add(variable);
 
                 while (true)
                 {
@@ -55,6 +59,7 @@ namespace Mince.Keywords
                         if (value.MemberExists(name))
                         {
                             variable = value.GetMember(name);
+                            tree.Add(variable);
 
                             if (variable.isPrivate)
                             {
@@ -72,6 +77,7 @@ namespace Mince.Keywords
                             value.members.Add(v);
 
                             variable = v;
+                            tree.Add(variable);
                         }
                         else
                         {
@@ -84,7 +90,7 @@ namespace Mince.Keywords
                     }
                 }
 
-                return variable;
+                return tree;
             }
             else
             {

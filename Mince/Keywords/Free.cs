@@ -15,9 +15,17 @@ namespace Mince.Keywords
         {
             interpreter.Eat();
 
-            Variable v = Identifier.GetIdentifier(interpreter);
+            var tree = Identifier.GetTree(interpreter);
 
-            v = null;
+            if (tree.length == 1)
+            {
+                interpreter.variables.variables.Remove(tree.lastVariable);
+            }
+            else
+            {
+                tree[tree.length - 2].GetValue().members.Remove(tree.lastVariable);
+            }
+
             interpreter.Eat("SEMICOLON");
 
             return new MinceNull();
