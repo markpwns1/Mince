@@ -20,7 +20,7 @@ namespace Mince.Keywords
             {
                 Variable variable = interpreter.variables.Get(identifier);
                 MinceObject value = variable.GetValue();
-                bool lastWasFunc = variable.GetValue().GetType() == typeof(MinceFunction) || variable.GetValue().GetType() == typeof(MinceUserFunction);
+                bool lastWasFunc = value.GetType() == typeof(MinceFunction) || value.GetType() == typeof(MinceUserFunction);
 
                 tree.Add(variable);
 
@@ -28,30 +28,47 @@ namespace Mince.Keywords
                 {
                     if (interpreter.currentToken.type == "L_BRACKET")
                     {
-                        if (variable.GetValue().GetType() == typeof(MinceUserFunction))
+                        interpreter.Eat();
+                        MinceObject[] args = interpreter.GetParameters();
+                        interpreter.Eat("R_BRACKET");
+
+                        if (value.GetType() == typeof(MinceUserFunction))
                         {
-                            var func = variable.GetValue() as MinceUserFunction;
-
-                            interpreter.Eat();
-                            MinceObject[] args = interpreter.GetParameters();
-                            interpreter.Eat("R_BRACKET");
-
-                            value = func.call(args);
+                            value = (value as MinceUserFunction).call(args);
                         }
-                        else if (variable.GetValue().GetType() == typeof(MinceFunction))
+                        else if (value.GetType() == typeof(MinceFunction))
                         {
-                            interpreter.Eat();
-                            MinceObject[] p = interpreter.GetParameters();
-                            interpreter.Eat("R_BRACKET");
-
-                            value = (variable.GetValue() as MinceFunction).Call(p);
+                            value = (value as MinceFunction).Call(args);
                         }
                         else
                         {
-                            throw new InterpreterException(interpreter.currentToken, variable.name + " is not a function! It is a " + variable.GetValue().GetType().Name);
+                            throw new InterpreterException(interpreter.currentToken, variable.name + " is not a function! It is a " + value.GetType().Name);
                         }
 
                         lastWasFunc = true;
+                        continue;
+                    }
+
+                    if (interpreter.currentToken.type == "L_SQUARE_BRACKET")
+                    {
+                        if (value.GetType() != typeof(MinceArray))
+                        {
+                            throw new InterpreterException(interpreter.currentToken, "Can only apply an index to an Array, not a " + value.GetType().Name);
+                        }
+
+                        interpreter.Eat();
+                        MinceObject index = interpreter.evaluation.Evaluate();
+
+                        if (index.GetType() != typeof(MinceNumber))
+                        {
+                            throw new InterpreterException(interpreter.currentToken, "Index must be a number! Not a " + index.GetType().Name);
+                        }
+
+                        interpreter.Eat("R_SQUARE_BRACKET");
+
+                        value = ((MinceArray)value).get((MinceNumber)index);
+
+                        continue;
                     }
 
                     if (interpreter.currentToken.type == "DOT")
@@ -74,7 +91,7 @@ namespace Mince.Keywords
 
                             value = variable.GetValue();
                         }
-                        else if (variable.GetValue().GetType() == typeof(MinceDynamic))
+                        else if (value.GetType() == typeof(MinceDynamic))
                         {
                             Variable v = new Variable(name, new MinceDynamic(), false, -1);
                             value.members.Add(v);

@@ -10,6 +10,9 @@ namespace Mince
         public Interpreter interpreter;
         //public Variables variables = new Variables();
 
+        // Order of operation is from up to down
+        // Higher in the file is done last, lower in the file is done first
+
         public void Init(Interpreter interpreter)
         {
             this.interpreter = interpreter;
@@ -43,7 +46,7 @@ namespace Mince
 
         public MinceObject Compare()
         {
-            MinceObject result = Add();
+            MinceObject result = Index();
 
             while (
                 new List<string>() {
@@ -82,6 +85,35 @@ namespace Mince
                         result = result.LessOrEqual(Add());
                         break;
                 }
+            }
+
+            return result;
+        }
+
+        public MinceObject Index()
+        {
+            MinceObject result = Add();
+
+            while (interpreter.currentToken.type == "L_SQUARE_BRACKET")
+            {
+                if (result.GetType() != typeof(MinceArray))
+                {
+                    throw new InterpreterException(interpreter.currentToken, "Can only apply an index to an Array, not a " + result.GetType().Name);
+                }
+
+                interpreter.Eat();
+                MinceObject index = Evaluate();
+
+                if (index.GetType() != typeof(MinceNumber))
+                {
+                    throw new InterpreterException(interpreter.currentToken, "Index must be a number! Not a " + index.GetType().Name);
+                }
+
+                interpreter.Eat("R_SQUARE_BRACKET");
+
+                result = ((MinceArray)result).get((MinceNumber)index);
+
+                continue;
             }
 
             return result;
