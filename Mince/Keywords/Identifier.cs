@@ -44,7 +44,7 @@ namespace Mince.Keywords
                         {
                             throw new InterpreterException(interpreter.currentToken, variable.name + " is not a function! It is a " + value.GetType().Name);
                         }
-
+                        
                         lastWasFunc = true;
                         continue;
                     }

@@ -29,7 +29,22 @@ namespace Mince
             {
                 foreach (Attribute attr in c.GetCustomAttributes(true))
                 {
-                    if (attr.GetType() == typeof(InterpreterKeyword) && c.BaseType == typeof(Keyword))
+                    bool inheritsKeyword = false;
+                    Type t = c.BaseType;
+                    while (t != typeof(object))
+                    {
+                        if(t == typeof(Keyword))
+                        {
+                            inheritsKeyword = true;
+                            break;
+                        }
+                        else
+                        {
+                            t = t.BaseType;
+                        }
+                    }
+
+                    if (attr.GetType() == typeof(InterpreterKeyword) && inheritsKeyword)
                     {
                         Keyword k = (Keyword)Activator.CreateInstance(c);
                         k.token = ((InterpreterKeyword)attr).token;
